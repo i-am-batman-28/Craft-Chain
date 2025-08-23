@@ -6,10 +6,65 @@ import Navbar from "@/components/Navbar";
 import Image from "next/image";
 import Footer from "@/components/Footer";
 import { useRouter } from 'next/navigation';
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
     const router = useRouter();
+    
+    // Hero Images Carousel Data
+    const heroImages = [
+        {
+            src: "/crf.jpg",
+            alt: "Traditional Indian Crafts",
+            title: "Master Craftsmanship",
+            subtitle: "Centuries of Tradition"
+        },
+        {
+            src: "/22.jpg",
+            alt: "Authentic Artisan Work",
+            title: "Authentic Artistry",
+            subtitle: "Handcrafted Excellence"
+        },
+        {
+            src: "/23.jpg",
+            alt: "Indian Heritage Crafts",
+            title: "Heritage & Culture",
+            subtitle: "Living Traditions"
+        },
+        {
+            src: "/24.jpg",
+            alt: "Traditional Craftsmanship",
+            title: "Timeless Beauty",
+            subtitle: "Artisan Expertise"
+        },
+        {
+            src: "/25.jpg",
+            alt: "Handmade Indian Art",
+            title: "Creative Legacy",
+            subtitle: "Skilled Hands"
+        },
+        {
+            src: "/26.jpg",
+            alt: "Cultural Heritage",
+            title: "Cultural Treasures",
+            subtitle: "Authentic Origins"
+        }
+    ];
+
+    // Carousel state
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    
+    // Auto-rotate images with professional timing
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentImageIndex((prevIndex) => 
+                prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
+            );
+        }, 4000); // 4 seconds per image - professional timing
+
+        return () => clearInterval(interval);
+    }, [heroImages.length]);
+
     const [products] = useState([
         {
             id: 1,
@@ -159,18 +214,113 @@ export default function Home() {
                             transition={{ duration: 0.8, delay: 0.2 }}
                             className="relative"
                         >
-                            <div className="relative">
+                            <div className="relative group">
                                 <div className="absolute inset-0 bg-gradient-to-r from-primary-400 to-accent-400 rounded-3xl transform rotate-6 opacity-20"></div>
                                 <div className="relative bg-white rounded-3xl shadow-premium overflow-hidden">
-                                    <img
-                                        src="/crf.jpg"
-                                        alt="Indian Crafts"
-                                        className="w-full h-[600px] object-cover"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                                    <div className="absolute bottom-6 left-6 text-white">
-                                        <div className="text-lg font-semibold">Master Craftsmanship</div>
-                                        <div className="text-sm opacity-90">Centuries of Tradition</div>
+                                    {/* Image Carousel - Professional Crossfade */}
+                                    <div className="relative w-full h-[600px] overflow-hidden">
+                                        {/* Background Image Layer (Previous Image) */}
+                                        <div className="absolute inset-0">
+                                            <img
+                                                src={heroImages[currentImageIndex === 0 ? heroImages.length - 1 : currentImageIndex - 1].src}
+                                                alt="Background"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+
+                                        {/* Active Image Layer (Current Image) */}
+                                        <AnimatePresence mode="wait">
+                                            <motion.div
+                                                key={currentImageIndex}
+                                                className="absolute inset-0"
+                                                initial={{ opacity: 0, scale: 1.05 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0.95 }}
+                                                transition={{ 
+                                                    duration: 1.2,
+                                                    ease: [0.25, 0.46, 0.45, 0.94] // Professional easing
+                                                }}
+                                            >
+                                                <img
+                                                    src={heroImages[currentImageIndex].src}
+                                                    alt={heroImages[currentImageIndex].alt}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </motion.div>
+                                        </AnimatePresence>
+                                        
+                                        {/* Gradient Overlay */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent"></div>
+                                        
+                                        {/* Image Content with Smooth Transition */}
+                                        <AnimatePresence mode="wait">
+                                            <motion.div
+                                                key={currentImageIndex}
+                                                className="absolute bottom-6 left-6 text-white"
+                                                initial={{ opacity: 0, y: 30, x: -20 }}
+                                                animate={{ opacity: 1, y: 0, x: 0 }}
+                                                exit={{ opacity: 0, y: -10, x: 20 }}
+                                                transition={{ 
+                                                    duration: 0.8, 
+                                                    delay: 0.3,
+                                                    ease: [0.25, 0.46, 0.45, 0.94]
+                                                }}
+                                            >
+                                                <div className="text-lg font-semibold drop-shadow-lg">
+                                                    {heroImages[currentImageIndex].title}
+                                                </div>
+                                                <div className="text-sm opacity-90 drop-shadow-md">
+                                                    {heroImages[currentImageIndex].subtitle}
+                                                </div>
+                                            </motion.div>
+                                        </AnimatePresence>
+
+                                        {/* Enhanced Carousel Indicators */}
+                                        <div className="absolute bottom-6 right-6 flex space-x-2">
+                                            {heroImages.map((_, index) => (
+                                                <motion.button
+                                                    key={index}
+                                                    onClick={() => setCurrentImageIndex(index)}
+                                                    className={`h-2 rounded-full transition-all duration-500 backdrop-blur-sm ${
+                                                        index === currentImageIndex
+                                                            ? 'bg-white w-8 shadow-lg'
+                                                            : 'bg-white/40 w-2 hover:bg-white/60 hover:w-4'
+                                                    }`}
+                                                    whileHover={{ scale: 1.2 }}
+                                                    whileTap={{ scale: 0.9 }}
+                                                    aria-label={`Go to slide ${index + 1}`}
+                                                />
+                                            ))}
+                                        </div>
+
+                                        {/* Enhanced Navigation Arrows */}
+                                        <motion.button
+                                            onClick={() => setCurrentImageIndex(
+                                                currentImageIndex === 0 ? heroImages.length - 1 : currentImageIndex - 1
+                                            )}
+                                            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 backdrop-blur-md text-white p-3 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100"
+                                            whileHover={{ scale: 1.1, x: -2 }}
+                                            whileTap={{ scale: 0.9 }}
+                                            aria-label="Previous image"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                        </motion.button>
+                                        
+                                        <motion.button
+                                            onClick={() => setCurrentImageIndex(
+                                                currentImageIndex === heroImages.length - 1 ? 0 : currentImageIndex + 1
+                                            )}
+                                            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 backdrop-blur-md text-white p-3 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100"
+                                            whileHover={{ scale: 1.1, x: 2 }}
+                                            whileTap={{ scale: 0.9 }}
+                                            aria-label="Next image"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </motion.button>
                                     </div>
                                 </div>
                             </div>
