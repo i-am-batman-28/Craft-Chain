@@ -1,15 +1,115 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+// Move static products outside component to avoid recreation
+const STATIC_PRODUCTS = [
+    {
+        id: 1,
+        name: "Traditional Clay Pottery",
+        category: "pottery",
+        price: 1250,
+        originalPrice: 1500,
+        rating: 4.8,
+        reviews: 124,
+        imageUrl: "/pottery.jpg",
+        artisanName: "Ramesh Kumar",
+        artisanAddress: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+        location: "Jaipur, Rajasthan",
+        description: "Hand-crafted clay pottery using traditional techniques passed down through generations",
+        badge: "Bestseller",
+        inStock: true
+    },
+    {
+        id: 2,
+        name: "Handwoven Pashmina Shawl",
+        category: "textiles",
+        price: 3500,
+        originalPrice: 4200,
+        rating: 4.9,
+        reviews: 89,
+        imageUrl: "/p.jpg",
+        artisanName: "Fatima Begum",
+        artisanAddress: "0x9D7f74d0C41E726EC95884E0e97Fa6129e3b5E99",
+        location: "Srinagar, Kashmir",
+        description: "Authentic Kashmiri Pashmina shawl with intricate handwoven patterns",
+        badge: "Premium",
+        inStock: true
+    },
+    {
+        id: 3,
+        name: "Brass Temple Bell",
+        category: "metalwork",
+        price: 850,
+        originalPrice: 1000,
+        rating: 4.7,
+        reviews: 156,
+        imageUrl: "/b.jpg",
+        artisanName: "Vishnu Prajapati",
+        artisanAddress: "0x3B9D6A6C8D2E1F4A5B7C9E8D0F2A4B6C8E0D2F1",
+        location: "Moradabad, UP",
+        description: "Traditional brass bell crafted using ancient metalworking techniques",
+        badge: "Trending",
+        inStock: true
+    },
+    {
+        id: 4,
+        name: "Madhubani Painting",
+        category: "art",
+        price: 2200,
+        originalPrice: 2800,
+        rating: 4.9,
+        reviews: 203,
+        imageUrl: "/m.jpg",
+        artisanName: "Lakshmi Devi",
+        artisanAddress: "0x1A2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D7E8F9A0",
+        location: "Madhubani, Bihar",
+        description: "Traditional Madhubani artwork depicting cultural stories and motifs",
+        badge: "Featured",
+        inStock: true
+    },
+    {
+        id: 5,
+        name: "Wooden Handicraft",
+        category: "woodwork",
+        price: 1800,
+        originalPrice: 2100,
+        rating: 4.6,
+        reviews: 98,
+        imageUrl: "/shopping-2.jpg",
+        artisanName: "Suresh Sharma",
+        artisanAddress: "0x4F3E2D1C0B9A8F7E6D5C4B3A2E1D0C9B8A7F6E5",
+        location: "Saharanpur, UP",
+        description: "Intricately carved wooden decorative items made from sustainable wood",
+        badge: "Eco-Friendly",
+        inStock: true
+    },
+    {
+        id: 6,
+        name: "Zari Embroidered Saree",
+        category: "textiles",
+        price: 4500,
+        originalPrice: 5200,
+        rating: 4.8,
+        reviews: 167,
+        imageUrl: "/shopping.jpg",
+        artisanName: "Priya Patel",
+        artisanAddress: "0x5E4D3C2B1A0F9E8D7C6B5A4E3D2C1B0A9F8E7D6",
+        location: "Varanasi, UP",
+        description: "Hand-embroidered silk saree with traditional zari work",
+        badge: "Luxury",
+        inStock: false
+    }
+];
+
 export default function Marketplace() {
     const router = useRouter();
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [products, setProducts] = useState(STATIC_PRODUCTS); // Initialize with static products immediately
+    const [loading, setLoading] = useState(false); // Start with false since we have static products
     const [searchTerm, setSearchTerm] = useState("");
     const [category, setCategory] = useState("all");
     const [sortBy, setSortBy] = useState("featured");
@@ -17,141 +117,46 @@ export default function Marketplace() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                // First try to fetch from database
+                setLoading(true);
                 const response = await fetch('/api/products');
                 const data = await response.json();
                 
                 if (data.products && data.products.length > 0) {
                     // Use database products
                     setProducts(data.products);
-                } else {
-                    // Fallback to static products if no database products
-                    const staticProducts = [
-            {
-                id: 1,
-                name: "Traditional Clay Pottery",
-                category: "pottery",
-                price: 1250,
-                originalPrice: 1500,
-                rating: 4.8,
-                reviews: 124,
-                imageUrl: "/pottery.jpg",
-                artisanName: "Ramesh Kumar",
-                artisanAddress: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-                location: "Jaipur, Rajasthan",
-                description: "Hand-crafted clay pottery using traditional techniques passed down through generations",
-                badge: "Bestseller",
-                inStock: true
-            },
-            {
-                id: 2,
-                name: "Handwoven Pashmina Shawl",
-                category: "textiles",
-                price: 3500,
-                originalPrice: 4200,
-                rating: 4.9,
-                reviews: 89,
-                imageUrl: "/p.jpg",
-                artisanName: "Fatima Begum",
-                artisanAddress: "0x9D7f74d0C41E726EC95884E0e97Fa6129e3b5E99",
-                location: "Srinagar, Kashmir",
-                description: "Authentic Kashmiri Pashmina shawl with intricate handwoven patterns",
-                badge: "Premium",
-                inStock: true
-            },
-            {
-                id: 3,
-                name: "Brass Temple Bell",
-                category: "metalwork",
-                price: 850,
-                originalPrice: 1000,
-                rating: 4.7,
-                reviews: 156,
-                imageUrl: "/b.jpg",
-                artisanName: "Vishnu Prajapati",
-                artisanAddress: "0x3B9D6A6C8D2E1F4A5B7C9E8D0F2A4B6C8E0D2F1",
-                location: "Moradabad, UP",
-                description: "Traditional brass bell crafted using ancient metalworking techniques",
-                badge: "Trending",
-                inStock: true
-            },
-            {
-                id: 4,
-                name: "Madhubani Painting",
-                category: "art",
-                price: 2200,
-                originalPrice: 2800,
-                rating: 4.9,
-                reviews: 203,
-                imageUrl: "/m.jpg",
-                artisanName: "Lakshmi Devi",
-                artisanAddress: "0x1A2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D7E8F9A0",
-                location: "Madhubani, Bihar",
-                description: "Traditional Madhubani artwork depicting cultural stories and motifs",
-                badge: "Featured",
-                inStock: true
-            },
-            {
-                id: 5,
-                name: "Wooden Handicraft",
-                category: "woodwork",
-                price: 1800,
-                originalPrice: 2100,
-                rating: 4.6,
-                reviews: 98,
-                imageUrl: "/shopping-2.jpg",
-                artisanName: "Suresh Sharma",
-                artisanAddress: "0x4F3E2D1C0B9A8F7E6D5C4B3A2E1D0C9B8A7F6E5",
-                location: "Saharanpur, UP",
-                description: "Intricately carved wooden decorative items made from sustainable wood",
-                badge: "Eco-Friendly",
-                inStock: true
-            },
-            {
-                id: 6,
-                name: "Zari Embroidered Saree",
-                category: "textiles",
-                price: 4500,
-                originalPrice: 5200,
-                rating: 4.8,
-                reviews: 167,
-                imageUrl: "/shopping.jpg",
-                artisanName: "Priya Patel",
-                artisanAddress: "0x5E4D3C2B1A0F9E8D7C6B5A4E3D2C1B0A9F8E7D6",
-                location: "Varanasi, UP",
-                description: "Hand-embroidered silk saree with traditional zari work",
-                badge: "Luxury",
-                inStock: false
-            }
-        ];
-                    setProducts(staticProducts);
                 }
+                // If no database products, keep static products (already set)
             } catch (error) {
                 console.error('Error fetching products:', error);
-                setProducts([]);
+                // Keep static products on error
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
         
         fetchProducts();
     }, []);
 
-    const categories = [
+    // Memoize categories to avoid recalculating on every render
+    const categories = useMemo(() => [
         { id: "all", name: "All Categories", count: products.length },
         { id: "pottery", name: "Pottery", count: products.filter(p => p.category === "pottery").length },
         { id: "textiles", name: "Textiles", count: products.filter(p => p.category === "textiles").length },
         { id: "metalwork", name: "Metalwork", count: products.filter(p => p.category === "metalwork").length },
         { id: "art", name: "Art", count: products.filter(p => p.category === "art").length },
         { id: "woodwork", name: "Woodwork", count: products.filter(p => p.category === "woodwork").length }
-    ];
+    ], [products]);
 
-    const filteredProducts = products.filter(product => {
-        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            product.artisanName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            product.location.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = category === "all" || product.category === category;
-        return matchesSearch && matchesCategory;
-    });
+    // Memoize filtered products to avoid recalculating on every render
+    const filteredProducts = useMemo(() => {
+        return products.filter(product => {
+            const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                product.artisanName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                product.location.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesCategory = category === "all" || product.category === category;
+            return matchesSearch && matchesCategory;
+        });
+    }, [products, searchTerm, category]);
 
     const handlePurchase = (product) => {
         // Use _id for database products, fallback to id for static products
