@@ -45,9 +45,11 @@ export default function Navbar() {
             animate={{ y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-                isScrolled 
-                    ? "bg-white/95 backdrop-blur-md shadow-luxury border-b border-neutral-200/50" 
-                    : "bg-transparent"
+                pathname === "/" 
+                    ? "bg-white/95 backdrop-blur-md shadow-luxury border-b border-neutral-200/50"
+                    : (isScrolled 
+                        ? "bg-white/95 backdrop-blur-md shadow-luxury border-b border-neutral-200/50" 
+                        : "bg-transparent")
             }`}
         >
             <div className="container-custom">
@@ -77,10 +79,18 @@ export default function Navbar() {
                                 </div>
                             </div>
                             <div className="flex flex-col">
-                                <span className={`text-2xl font-bold leading-tight ${isScrolled ? "text-[#8B4513]" : "text-white"} font-fancy`}>
+                                <span className={`text-2xl font-bold leading-tight ${
+                                    pathname === "/" 
+                                        ? "text-[#8B4513]" 
+                                        : (isScrolled ? "text-[#8B4513]" : "text-white")
+                                } font-fancy`}>
                                     CraftChain
                                 </span>
-                                <span className={`text-xs font-medium leading-none hidden sm:block ${isScrolled ? "text-[#A0522D] opacity-80" : "text-orange-200 opacity-90"}`}>
+                                <span className={`text-xs font-medium leading-none hidden sm:block ${
+                                    pathname === "/" 
+                                        ? "text-[#A0522D] opacity-80" 
+                                        : (isScrolled ? "text-[#A0522D] opacity-80" : "text-orange-200 opacity-90")
+                                }`}>
                                     Authentic Indian Crafts
                                 </span>
                             </div>
@@ -99,10 +109,14 @@ export default function Navbar() {
                                     href={link.href}
                                     className={`font-medium transition-colors duration-200 ${
                                         pathname === link.href
-                                            ? (isScrolled ? "text-primary-600" : "text-primary-200")
-                                            : (isScrolled 
+                                            ? (pathname === "/" 
+                                                ? "text-primary-600" 
+                                                : (isScrolled ? "text-primary-600" : "text-primary-200"))
+                                            : (pathname === "/" 
                                                 ? "text-neutral-700 hover:text-primary-600" 
-                                                : "text-white hover:text-primary-200")
+                                                : (isScrolled 
+                                                    ? "text-neutral-700 hover:text-primary-600" 
+                                                    : "text-white hover:text-primary-200"))
                                     }`}
                                 >
                                     {link.label}
@@ -125,10 +139,14 @@ export default function Navbar() {
                                             href={link.href}
                                             className={`font-medium transition-colors duration-200 ${
                                                 pathname === link.href
-                                                    ? (isScrolled ? "text-primary-600" : "text-primary-200")
-                                                    : (isScrolled 
+                                                    ? (pathname === "/" 
+                                                        ? "text-primary-600" 
+                                                        : (isScrolled ? "text-primary-600" : "text-primary-200"))
+                                                    : (pathname === "/" 
                                                         ? "text-neutral-700 hover:text-primary-600" 
-                                                        : "text-white hover:text-primary-200")
+                                                        : (isScrolled 
+                                                            ? "text-neutral-700 hover:text-primary-600" 
+                                                            : "text-white hover:text-primary-200"))
                                             }`}
                                         >
                                             {link.label}
@@ -137,7 +155,11 @@ export default function Navbar() {
                                 ))}
                                 
                                 <div className="flex items-center space-x-3">
-                                    <div className={`text-sm font-medium ${isScrolled ? "text-neutral-700" : "text-white"}`}>
+                                    <div className={`text-sm font-medium ${
+                                        pathname === "/" 
+                                            ? "text-neutral-700" 
+                                            : (isScrolled ? "text-neutral-700" : "text-white")
+                                    }`}>
                                         Welcome, {name || "User"}
                                     </div>
                                     <motion.button
@@ -156,9 +178,11 @@ export default function Navbar() {
                                     <Link
                                         href="/login"
                                         className={`px-4 py-2 font-medium rounded-xl transition-colors duration-200 ${
-                                            isScrolled 
+                                            pathname === "/" 
                                                 ? "text-neutral-700 hover:text-primary-600 hover:bg-primary-50" 
-                                                : "text-white hover:bg-white/10"
+                                                : (isScrolled 
+                                                    ? "text-neutral-700 hover:text-primary-600 hover:bg-primary-50" 
+                                                    : "text-white hover:bg-white/10")
                                         }`}
                                     >
                                         Login
@@ -181,9 +205,11 @@ export default function Navbar() {
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                         className={`md:hidden p-2 rounded-xl transition-colors duration-200 ${
-                            isScrolled 
+                            pathname === "/" 
                                 ? "text-neutral-700 hover:bg-neutral-100" 
-                                : "text-white hover:bg-white/10"
+                                : (isScrolled 
+                                    ? "text-neutral-700 hover:bg-neutral-100" 
+                                    : "text-white hover:bg-white/10")
                         }`}
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
