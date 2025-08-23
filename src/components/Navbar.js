@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { logout } from "@/store/slices/authSlice";
+import { logout, initializeAuth } from "@/redux/features/authSlice";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
@@ -13,6 +13,11 @@ export default function Navbar() {
     const dispatch = useDispatch();
     const router = useRouter();
     const pathname = usePathname();
+
+    // Initialize auth state from cookies on component mount
+    useEffect(() => {
+        dispatch(initializeAuth());
+    }, [dispatch]);
 
     useEffect(() => {
         const handleScroll = () => {

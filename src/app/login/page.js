@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { setUser } from "@/store/slices/authSlice";
+import { login } from "@/redux/features/authSlice";
+import { authCookies } from "@/utils/cookies";
 import Navbar from "@/components/Navbar";
 
 export default function Login() {
@@ -14,6 +15,7 @@ export default function Login() {
         password: "",
         loginMethod: "email" // "email" or "phone"
     });
+    const [rememberMe, setRememberMe] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [otpSent, setOtpSent] = useState(false);
@@ -21,6 +23,28 @@ export default function Login() {
 
     const router = useRouter();
     const dispatch = useDispatch();
+    const { isAuthenticated } = useSelector((state) => state.auth);
+
+    // Load saved credentials on component mount
+    useEffect(() => {
+        const lastCredentials = authCookies.getLastCredentials();
+        if (lastCredentials.email || lastCredentials.phone) {
+            setFormData(prev => ({
+                ...prev,
+                email: lastCredentials.email,
+                phone: lastCredentials.phone,
+                loginMethod: lastCredentials.email ? "email" : "phone"
+            }));
+            setRememberMe(lastCredentials.rememberMe);
+        }
+    }, []);
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            router.push("/marketplace");
+        }
+    }, [isAuthenticated, router]);
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -46,12 +70,20 @@ export default function Login() {
             const data = await response.json();
 
             if (data.success) {
-                dispatch(setUser(data.user));
-                router.push(data.user.userType === "artisan" ? "/dashboard" : "/marketplace");
+                // Dispatch login action with cookie integration
+                dispatch(login({ 
+                    userData: data.user, 
+                    rememberMe 
+                }));
+                
+                // Redirect based on user type
+                const redirectPath = data.user.userType === "artisan" ? "/dashboard" : "/marketplace";
+                router.push(redirectPath);
             } else {
                 setError(data.message || "Login failed");
             }
         } catch (error) {
+            console.error("Login error:", error);
             setError("Network error. Please try again.");
         } finally {
             setLoading(false);
@@ -80,6 +112,7 @@ export default function Login() {
                     setError(data.message || "Failed to send OTP");
                 }
             } catch (error) {
+                console.error("OTP send error:", error);
                 setError("Network error. Please try again.");
             }
         } else {
@@ -98,12 +131,20 @@ export default function Login() {
                 const data = await response.json();
 
                 if (data.success) {
-                    dispatch(setUser(data.user));
-                    router.push(data.user.userType === "artisan" ? "/dashboard" : "/marketplace");
+                    // Dispatch login action with cookie integration
+                    dispatch(login({ 
+                        userData: data.user, 
+                        rememberMe 
+                    }));
+                    
+                    // Redirect based on user type
+                    const redirectPath = data.user.userType === "artisan" ? "/dashboard" : "/marketplace";
+                    router.push(redirectPath);
                 } else {
                     setError(data.message || "Invalid OTP");
                 }
             } catch (error) {
+                console.error("OTP verification error:", error);
                 setError("Network error. Please try again.");
             }
         }
@@ -211,8 +252,13 @@ export default function Login() {
                                     </div>
 
                                     <div className="flex items-center justify-between">
-                                        <label className="flex items-center">
-                                            <input type="checkbox" className="rounded border-neutral-300 text-primary-600 focus:ring-primary-500" />
+                                        <label className="flex items-center cursor-pointer">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={rememberMe}
+                                                onChange={(e) => setRememberMe(e.target.checked)}
+                                                className="rounded border-neutral-300 text-primary-600 focus:ring-primary-500" 
+                                            />
                                             <span className="ml-2 text-sm text-neutral-600">Remember me</span>
                                         </label>
                                         <Link href="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
@@ -290,6 +336,19 @@ export default function Login() {
                                             </p>
                                         </motion.div>
                                     )}
+
+                                    {/* Remember Me checkbox for phone login */}
+                                    <div className="flex items-center">
+                                        <label className="flex items-center cursor-pointer">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={rememberMe}
+                                                onChange={(e) => setRememberMe(e.target.checked)}
+                                                className="rounded border-neutral-300 text-primary-600 focus:ring-primary-500" 
+                                            />
+                                            <span className="ml-2 text-sm text-neutral-600">Remember me</span>
+                                        </label>
+                                    </div>
 
                                     <motion.button
                                         type="submit"

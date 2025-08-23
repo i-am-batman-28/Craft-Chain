@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
-// MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://karthik_ms_28:<db_password>@cluster0.84dkqlj.mongodb.net/craftchain?retryWrites=true&w=majority&appName=Cluster0';
+// MongoDB connection - using the corrected URI
+const MONGODB_URI = 'mongodb+srv://karthik_ms_28:puzha248%2B@cluster0.84dkqlj.mongodb.net/craftchain?retryWrites=true&w=majority&appName=Cluster0';
 
 // Product Schema (matching your model)
 const ProductSchema = new mongoose.Schema({

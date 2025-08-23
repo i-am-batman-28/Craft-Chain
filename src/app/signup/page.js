@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { setUser } from "@/store/slices/authSlice";
+import { login } from "@/redux/features/authSlice";
+import { authCookies } from "@/utils/cookies";
 import Navbar from "@/components/Navbar";
 
 export default function Signup() {
@@ -27,6 +28,14 @@ export default function Signup() {
 
     const router = useRouter();
     const dispatch = useDispatch();
+    const { isAuthenticated } = useSelector((state) => state.auth);
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            router.push("/marketplace");
+        }
+    }, [isAuthenticated, router]);
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -78,8 +87,15 @@ export default function Signup() {
             const data = await response.json();
 
             if (data.success) {
-                dispatch(setUser(data.user));
-                router.push(data.user.userType === "artisan" ? "/dashboard" : "/marketplace");
+                // Auto-login after successful signup with remember me enabled
+                dispatch(login({ 
+                    userData: data.user, 
+                    rememberMe: true  // Remember new users by default
+                }));
+                
+                // Redirect based on user type
+                const redirectPath = data.user.userType === "artisan" ? "/dashboard" : "/marketplace";
+                router.push(redirectPath);
             } else {
                 setError(data.message || "Registration failed");
             }
@@ -141,8 +157,15 @@ export default function Signup() {
                 const data = await response.json();
 
                 if (data.success) {
-                    dispatch(setUser(data.user));
-                    router.push(data.user.userType === "artisan" ? "/dashboard" : "/marketplace");
+                    // Auto-login after successful signup with remember me enabled
+                    dispatch(login({ 
+                        userData: data.user, 
+                        rememberMe: true  // Remember new users by default
+                    }));
+                    
+                    // Redirect based on user type
+                    const redirectPath = data.user.userType === "artisan" ? "/dashboard" : "/marketplace";
+                    router.push(redirectPath);
                 } else {
                     setError(data.message || "Invalid OTP");
                 }
