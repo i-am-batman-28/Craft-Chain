@@ -8,6 +8,7 @@ export default function AuthInitializer() {
 
     useEffect(() => {
         // Initialize auth state from cookies when the app loads
+        console.log('🔄 AuthInitializer: Initializing auth state from cookies...');
         dispatch(initializeAuth());
     }, [dispatch]);
 

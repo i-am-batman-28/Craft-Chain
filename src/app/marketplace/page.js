@@ -153,7 +153,9 @@ export default function Marketplace() {
         return matchesSearch && matchesCategory;
     });
 
-    const handlePurchase = (productId) => {
+    const handlePurchase = (product) => {
+        // Use _id for database products, fallback to id for static products
+        const productId = product._id || product.id;
         router.push(`/purchase/${productId}`);
     };
 
@@ -275,10 +277,10 @@ export default function Marketplace() {
                     >
                         {filteredProducts.map((product) => (
                             <motion.div
-                                key={product.id}
+                                key={product._id || product.id}
                                 variants={fadeInUp}
                                 className="group bg-white rounded-3xl shadow-elegant hover:shadow-premium transition-all duration-500 overflow-hidden cursor-pointer"
-                                onClick={() => handlePurchase(product.id)}
+                                onClick={() => handlePurchase(product)}
                                 whileHover={{ y: -5 }}
                             >
                                 <div className="relative overflow-hidden">
@@ -362,7 +364,7 @@ export default function Marketplace() {
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handlePurchase(product.id);
+                                                    handlePurchase(product);
                                                 }}
                                                 disabled={!product.inStock}
                                                 className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${

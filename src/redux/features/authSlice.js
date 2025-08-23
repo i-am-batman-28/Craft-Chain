@@ -5,21 +5,24 @@ import { authCookies } from '../../utils/cookies';
 const initializeStateFromCookies = () => {
     if (typeof window !== 'undefined') {
         const userData = authCookies.getUserData();
+        console.log('🍪 Initializing auth state from cookies:', userData);
         if (userData) {
-            return {
+            const initialState = {
                 walletAddress: userData.walletAddress || null,
                 isAuthenticated: true,
                 userType: userData.userType || null,
                 name: userData.name || null,
                 email: userData.email || null,
                 phone: userData.phone || null,
-                userId: userData.userId || null,
+                userId: userData.userId || userData._id || null,
                 loading: false,
                 error: null
             };
+            console.log('✅ Auth state initialized:', initialState);
+            return initialState;
         }
     }
-    return {
+    const defaultState = {
         walletAddress: null,
         isAuthenticated: false,
         userType: null,
@@ -30,6 +33,8 @@ const initializeStateFromCookies = () => {
         loading: false,
         error: null
     };
+    console.log('❌ No auth data found, using default state:', defaultState);
+    return defaultState;
 };
 
 // Async thunk for wallet connection
@@ -125,8 +130,11 @@ const authSlice = createSlice({
         },
         initializeAuth: (state) => {
             // Re-initialize from cookies (useful for app startup)
+            console.log('🔄 initializeAuth action called');
             const cookieState = initializeStateFromCookies();
+            console.log('🔄 Merging cookie state into Redux:', cookieState);
             Object.assign(state, cookieState);
+            console.log('✅ Redux auth state updated:', { ...state });
         }
     },
     extraReducers: (builder) => {

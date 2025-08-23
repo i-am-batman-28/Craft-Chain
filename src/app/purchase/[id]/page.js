@@ -11,90 +11,189 @@ export default function PurchasePage() {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [paymentLoading, setPaymentLoading] = useState(false);
-    const { user, isAuthenticated } = useSelector((state) => state.auth);
+    const { isAuthenticated, userId, name, email } = useSelector((state) => state.auth);
+
+    // Debug auth state
+    useEffect(() => {
+        console.log('🔍 Purchase Page Auth State:', { isAuthenticated, userId, name, email });
+    }, [isAuthenticated, userId, name, email]);
 
     useEffect(() => {
-        const products = {
-            "1": {
-                id: 1,
-                name: "Traditional Clay Pottery",
-                price: 1250, // Price in INR
-                imageUrl: "/pottery.jpg",
-                artisanName: "Ramesh Kumar",
-                location: "Jaipur, Rajasthan",
-                description: "Hand-crafted clay pottery using traditional techniques passed down through generations"
-            },
-            "2": {
-                id: 2,
-                name: "Handwoven Pashmina Shawl",
-                price: 3500,
-                imageUrl: "/p.jpg",
-                artisanName: "Fatima Begum",
-                location: "Srinagar, Kashmir",
-                description: "Authentic Kashmiri Pashmina shawl with intricate handwoven patterns"
-            },
-            "3": {
-                id: 3,
-                name: "Brass Temple Bell",
-                price: 850,
-                imageUrl: "/b.jpg",
-                artisanName: "Vishnu Prajapati",
-                location: "Moradabad, UP",
-                description: "Traditional brass bell crafted using ancient metalworking techniques"
-            },
-            "4": {
-                id: 4,
-                name: "Madhubani Painting",
-                price: 2200,
-                imageUrl: "/m.jpg",
-                artisanName: "Lakshmi Devi",
-                location: "Madhubani, Bihar",
-                description: "Traditional Madhubani artwork depicting cultural stories and motifs"
-            },
-            "5": {
-                id: 5,
-                name: "Wooden Handicraft",
-                price: 1500,
-                imageUrl: "/shopping-2.jpg",
-                artisanName: "Suresh Sharma",
-                location: "Saharanpur, UP",
-                description: "Intricately carved wooden decorative items made from sustainable wood"
-            },
-            "6": {
-                id: 6,
-                name: "Zari Embroidered Saree",
-                price: 4200,
-                imageUrl: "/shopping.jpg",
-                artisanName: "Priya Patel",
-                location: "Varanasi, UP",
-                description: "Hand-embroidered silk saree with traditional zari work"
+        const fetchProduct = async () => {
+            if (!params.id) return;
+            
+            try {
+                setLoading(true);
+                
+                // First try to fetch from database
+                const response = await fetch('/api/products');
+                const data = await response.json();
+                
+                if (data.products && data.products.length > 0) {
+                    // Find product by database _id
+                    const foundProduct = data.products.find(p => p._id === params.id);
+                    if (foundProduct) {
+                        setProduct(foundProduct);
+                        setLoading(false);
+                        return;
+                    }
+                }
+                
+                // Fallback to static products if not found in database
+                const staticProducts = {
+                    "1": {
+                        id: 1,
+                        name: "Traditional Clay Pottery",
+                        price: 1250,
+                        imageUrl: "/pottery.jpg",
+                        artisanName: "Ramesh Kumar",
+                        location: "Jaipur, Rajasthan",
+                        description: "Hand-crafted clay pottery using traditional techniques passed down through generations"
+                    },
+                    "2": {
+                        id: 2,
+                        name: "Handwoven Pashmina Shawl",
+                        price: 3500,
+                        imageUrl: "/p.jpg",
+                        artisanName: "Fatima Begum",
+                        location: "Srinagar, Kashmir",
+                        description: "Authentic Kashmiri Pashmina shawl with intricate handwoven patterns"
+                    },
+                    "3": {
+                        id: 3,
+                        name: "Brass Temple Bell",
+                        price: 850,
+                        imageUrl: "/b.jpg",
+                        artisanName: "Vishnu Prajapati",
+                        location: "Moradabad, UP",
+                        description: "Traditional brass bell crafted using ancient metalworking techniques"
+                    },
+                    "4": {
+                        id: 4,
+                        name: "Madhubani Painting",
+                        price: 2200,
+                        imageUrl: "/m.jpg",
+                        artisanName: "Lakshmi Devi",
+                        location: "Madhubani, Bihar",
+                        description: "Traditional Madhubani artwork depicting cultural stories and motifs"
+                    },
+                    "5": {
+                        id: 5,
+                        name: "Wooden Handicraft",
+                        price: 1500,
+                        imageUrl: "/shopping-2.jpg",
+                        artisanName: "Suresh Sharma",
+                        location: "Saharanpur, UP",
+                        description: "Intricately carved wooden decorative items made from sustainable wood"
+                    },
+                    "6": {
+                        id: 6,
+                        name: "Zari Embroidered Saree",
+                        price: 4200,
+                        imageUrl: "/shopping.jpg",
+                        artisanName: "Priya Patel",
+                        location: "Varanasi, UP",
+                        description: "Hand-embroidered silk saree with traditional zari work"
+                    }
+                };
+
+                // Use static product as fallback
+                const staticProduct = staticProducts[params.id];
+                if (staticProduct) {
+                    setProduct(staticProduct);
+                }
+                
+            } catch (error) {
+                console.error('Error fetching product:', error);
+                
+                // Fallback to static products on error
+                const staticProducts = {
+                    "1": { id: 1, name: "Traditional Clay Pottery", price: 1250, imageUrl: "/pottery.jpg", artisanName: "Ramesh Kumar", location: "Jaipur, Rajasthan", description: "Hand-crafted clay pottery using traditional techniques passed down through generations" },
+                    "2": { id: 2, name: "Handwoven Pashmina Shawl", price: 3500, imageUrl: "/p.jpg", artisanName: "Fatima Begum", location: "Srinagar, Kashmir", description: "Authentic Kashmiri Pashmina shawl with intricate handwoven patterns" },
+                    "3": { id: 3, name: "Brass Temple Bell", price: 850, imageUrl: "/b.jpg", artisanName: "Vishnu Prajapati", location: "Moradabad, UP", description: "Traditional brass bell crafted using ancient metalworking techniques" },
+                    "4": { id: 4, name: "Madhubani Painting", price: 2200, imageUrl: "/m.jpg", artisanName: "Lakshmi Devi", location: "Madhubani, Bihar", description: "Traditional Madhubani artwork depicting cultural stories and motifs" },
+                    "5": { id: 5, name: "Wooden Handicraft", price: 1500, imageUrl: "/shopping-2.jpg", artisanName: "Suresh Sharma", location: "Saharanpur, UP", description: "Intricately carved wooden decorative items made from sustainable wood" },
+                    "6": { id: 6, name: "Zari Embroidered Saree", price: 4200, imageUrl: "/shopping.jpg", artisanName: "Priya Patel", location: "Varanasi, UP", description: "Hand-embroidered silk saree with traditional zari work" }
+                };
+                
+                setProduct(staticProducts[params.id]);
+            } finally {
+                setLoading(false);
             }
         };
 
-        setProduct(products[params.id]);
-        setLoading(false);
+        fetchProduct();
     }, [params.id]);
 
     const handleRazorpayPayment = async () => {
+        if (!product) {
+            alert("Product not found!");
+            return;
+        }
+
+        console.log('🔍 Payment Handler Auth Check:', { isAuthenticated, userId, name, email });
+
+        if (!isAuthenticated) {
+            alert("Please login to make a purchase!");
+            router.push('/login');
+            return;
+        }
+
         setPaymentLoading(true);
 
         try {
+            // Validate product data
+            const productId = product._id || product.id;
+            const productPrice = product.price;
+            
+            if (!productId) {
+                throw new Error("Product ID is missing");
+            }
+            if (!productPrice || isNaN(productPrice) || productPrice <= 0) {
+                throw new Error(`Invalid product price: ${productPrice} (type: ${typeof productPrice})`);
+            }
+            if (!product.name) {
+                throw new Error("Product name is missing");
+            }
+
+            const orderPayload = {
+                productId: String(productId),
+                buyerId: String(userId || name || email || "demo_buyer_123"),
+                amount: Number(productPrice),
+                productName: String(product.name),
+                artisanAddress: String(product.artisanAddress || ""),
+            };
+
+            console.log('🔍 Preparing order data...', orderPayload);
+
             // Create Razorpay order
             const orderResponse = await fetch("/api/payment/create-order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    productId: product.id,
-                    buyerId: "demo_buyer_123", // In real app, get from auth
-                    amount: product.price,
-                    productName: product.name,
-                }),
+                body: JSON.stringify(orderPayload),
             });
 
             const orderData = await orderResponse.json();
+            console.log('💳 Order response status:', orderResponse.status);
+            console.log('💳 Order response data:', orderData);
+
+            if (!orderResponse.ok) {
+                console.error('❌ HTTP Error:', {
+                    status: orderResponse.status,
+                    statusText: orderResponse.statusText,
+                    data: orderData
+                });
+                throw new Error(`Server error (${orderResponse.status}): ${orderData.error || orderResponse.statusText}`);
+            }
 
             if (!orderData.success) {
-                throw new Error(orderData.error);
+                console.error('❌ Order creation failed:', orderData);
+                throw new Error(orderData.error || "Order creation failed");
+            }
+
+            if (!orderData.order || !orderData.order.id) {
+                console.error('❌ Invalid order data:', orderData);
+                throw new Error("Invalid order data received from server");
             }
 
             // Razorpay checkout options
@@ -116,11 +215,12 @@ export default function PurchasePage() {
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,
                                 razorpay_signature: response.razorpay_signature,
-                                productId: product.id,
-                                buyerId: "demo_buyer_123",
+                                productId: product._id || product.id,
+                                buyerId: userId || name || email || "demo_buyer_123",
                                 amount: product.price,
                                 productName: product.name,
                                 artisanName: product.artisanName,
+                                artisanAddress: product.artisanAddress,
                             }),
                         });
 
