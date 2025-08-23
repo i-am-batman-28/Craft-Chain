@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { fetchProductsWithCache, preloadProducts } from "@/utils/productCache";
 
 // Move static products outside component to avoid recreation
 const STATIC_PRODUCTS = [
@@ -117,13 +118,21 @@ export default function Marketplace() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                setLoading(true);
-                const response = await fetch('/api/products');
-                const data = await response.json();
+                // Use aggressive caching system
+                const result = await fetchProductsWithCache();
                 
-                if (data.products && data.products.length > 0) {
-                    // Use database products
-                    setProducts(data.products);
+                if (result.products && result.products.length > 0) {
+                    setProducts(result.products);
+                    
+                    if (result.fromCache) {
+                        console.log('⚡ Products loaded from cache instantly');
+                        // Still fetch fresh data in background if cache is getting old
+                        if (result.stale) {
+                            console.log('🔄 Cache is stale, refreshing in background...');
+                        }
+                    } else {
+                        console.log('🌐 Products loaded from server');
+                    }
                 }
                 // If no database products, keep static products (already set)
             } catch (error) {
@@ -136,6 +145,29 @@ export default function Marketplace() {
         
         fetchProducts();
     }, []);
+
+    // Preload products on component mount for even faster subsequent visits
+    useEffect(() => {
+        preloadProducts();
+    }, []);
+
+    // Preload critical images for instant display
+    useEffect(() => {
+        const preloadImages = () => {
+            const imagesToPreload = products.slice(0, 8).map(p => p.imageUrl); // First 8 images
+            
+            imagesToPreload.forEach(src => {
+                if (src && !src.startsWith('blob:')) {
+                    const img = new Image();
+                    img.src = src;
+                }
+            });
+        };
+
+        if (products.length > 0) {
+            preloadImages();
+        }
+    }, [products]);
 
     // Memoize categories to avoid recalculating on every render
     const categories = useMemo(() => [
