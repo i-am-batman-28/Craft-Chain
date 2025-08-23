@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
   serverExternalPackages: ['mongoose'],
   eslint: {
     ignoreDuringBuilds: true,
@@ -8,7 +7,13 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    config.externals.push({
+      'utf-8-validate': 'commonjs utf-8-validate',
+      'bufferutil': 'commonjs bufferutil',
+      'supports-color': 'commonjs supports-color'
+    })
+    
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -16,9 +21,17 @@ const nextConfig = {
         net: false,
         tls: false,
         crypto: false,
+        stream: false,
+        url: false,
+        zlib: false,
+        http: false,
+        https: false,
+        assert: false,
+        os: false,
+        path: false
       }
     }
-    config.externals.push('pino-pretty', 'lokijs', 'encoding')
+    
     return config
   },
   images: {
