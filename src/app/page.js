@@ -51,19 +51,27 @@ export default function Home() {
         }
     ];
 
-    // Carousel state
+    // Bulletproof carousel with CSS-only transitions
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [isMounted, setIsMounted] = useState(false);
     
-    // Auto-rotate images with professional timing
+    // Ensure component is mounted (client-side only)
     useEffect(() => {
+        setIsMounted(true);
+    }, []);
+    
+    // Ultra-smooth transition system with perfect timing
+    useEffect(() => {
+        if (!isMounted) return;
+        
         const interval = setInterval(() => {
             setCurrentImageIndex((prevIndex) => 
                 prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
             );
-        }, 4000); // 4 seconds per image - professional timing
+        }, 5000); // 5 seconds for comfortable viewing
 
         return () => clearInterval(interval);
-    }, [heroImages.length]);
+    }, [heroImages.length, isMounted]);
 
     const [products] = useState([
         {
@@ -217,110 +225,120 @@ export default function Home() {
                             <div className="relative group">
                                 <div className="absolute inset-0 bg-gradient-to-r from-primary-400 to-accent-400 rounded-3xl transform rotate-6 opacity-20"></div>
                                 <div className="relative bg-white rounded-3xl shadow-premium overflow-hidden">
-                                    {/* Image Carousel - Professional Crossfade */}
+                                    {/* Image Carousel - Seamless Crossfade */}
                                     <div className="relative w-full h-[600px] overflow-hidden">
-                                        {/* Background Image Layer (Previous Image) */}
-                                        <div className="absolute inset-0">
-                                            <img
-                                                src={heroImages[currentImageIndex === 0 ? heroImages.length - 1 : currentImageIndex - 1].src}
-                                                alt="Background"
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-
-                                        {/* Active Image Layer (Current Image) */}
-                                        <AnimatePresence mode="wait">
-                                            <motion.div
-                                                key={currentImageIndex}
-                                                className="absolute inset-0"
-                                                initial={{ opacity: 0, scale: 1.05 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                exit={{ opacity: 0, scale: 0.95 }}
-                                                transition={{ 
-                                                    duration: 1.2,
-                                                    ease: [0.25, 0.46, 0.45, 0.94] // Professional easing
-                                                }}
-                                            >
-                                                <img
-                                                    src={heroImages[currentImageIndex].src}
-                                                    alt={heroImages[currentImageIndex].alt}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </motion.div>
-                                        </AnimatePresence>
-                                        
-                                        {/* Gradient Overlay */}
+                                        {/* Single Layer with Smooth Crossfade */}
+            {/* ZERO-FLASH CSS-Only Carousel - All images permanently mounted */}
+            <div className="absolute inset-0 overflow-hidden bg-black">
+              {heroImages.map((image, index) => (
+                <div
+                  key={`image-layer-${index}`}
+                  className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+                  style={{
+                    opacity: index === currentImageIndex ? 1 : 0,
+                    transform: 'translateZ(0)',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden',
+                    willChange: 'opacity',
+                    pointerEvents: 'none'
+                  }}
+                >
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    className="w-full h-full object-cover"
+                    style={{
+                      transform: 'translateZ(0)',
+                      backfaceVisibility: 'hidden',
+                      WebkitBackfaceVisibility: 'hidden',
+                      display: 'block',
+                      maxWidth: 'none'
+                    }}
+                    loading="eager"
+                    decoding="sync"
+                  />
+                </div>
+              ))}
+            </div>                                        {/* Gradient Overlay */}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent"></div>
                                         
-                                        {/* Image Content with Smooth Transition */}
-                                        <AnimatePresence mode="wait">
-                                            <motion.div
-                                                key={currentImageIndex}
-                                                className="absolute bottom-6 left-6 text-white"
-                                                initial={{ opacity: 0, y: 30, x: -20 }}
-                                                animate={{ opacity: 1, y: 0, x: 0 }}
-                                                exit={{ opacity: 0, y: -10, x: 20 }}
-                                                transition={{ 
-                                                    duration: 0.8, 
-                                                    delay: 0.3,
-                                                    ease: [0.25, 0.46, 0.45, 0.94]
-                                                }}
-                                            >
-                                                <div className="text-lg font-semibold drop-shadow-lg">
-                                                    {heroImages[currentImageIndex].title}
+                                        {/* Image Content with Smooth CSS Transition - Zero Flash */}
+                                        <div className="absolute bottom-6 left-6 text-white">
+                                            {heroImages.map((image, index) => (
+                                                <div
+                                                    key={`text-overlay-${index}`}
+                                                    className="transition-opacity duration-1000 ease-in-out"
+                                                    style={{
+                                                        opacity: index === currentImageIndex ? 1 : 0,
+                                                        position: index === currentImageIndex ? 'relative' : 'absolute',
+                                                        top: 0,
+                                                        left: 0,
+                                                        transform: 'translateZ(0)',
+                                                        willChange: 'opacity'
+                                                    }}
+                                                >
+                                                    <div className="text-lg font-semibold drop-shadow-lg">
+                                                        {image.title}
+                                                    </div>
+                                                    <div className="text-sm opacity-90 drop-shadow-md">
+                                                        {image.subtitle}
+                                                    </div>
                                                 </div>
-                                                <div className="text-sm opacity-90 drop-shadow-md">
-                                                    {heroImages[currentImageIndex].subtitle}
-                                                </div>
-                                            </motion.div>
-                                        </AnimatePresence>
+                                            ))}
+                                        </div>
 
-                                        {/* Enhanced Carousel Indicators */}
+                                        {/* Smooth Carousel Indicators */}
                                         <div className="absolute bottom-6 right-6 flex space-x-2">
                                             {heroImages.map((_, index) => (
-                                                <motion.button
+                                                <button
                                                     key={index}
                                                     onClick={() => setCurrentImageIndex(index)}
-                                                    className={`h-2 rounded-full transition-all duration-500 backdrop-blur-sm ${
+                                                    className={`h-2 rounded-full transition-all duration-500 backdrop-blur-sm hover:scale-110 ${
                                                         index === currentImageIndex
                                                             ? 'bg-white w-8 shadow-lg'
                                                             : 'bg-white/40 w-2 hover:bg-white/60 hover:w-4'
                                                     }`}
-                                                    whileHover={{ scale: 1.2 }}
-                                                    whileTap={{ scale: 0.9 }}
+                                                    style={{
+                                                        transform: 'translateZ(0)',
+                                                        willChange: 'transform, width, background-color'
+                                                    }}
                                                     aria-label={`Go to slide ${index + 1}`}
                                                 />
                                             ))}
                                         </div>
 
-                                        {/* Enhanced Navigation Arrows */}
-                                        <motion.button
+                                        {/* Smooth Navigation Arrows */}
+                                        <button
                                             onClick={() => setCurrentImageIndex(
                                                 currentImageIndex === 0 ? heroImages.length - 1 : currentImageIndex - 1
                                             )}
-                                            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 backdrop-blur-md text-white p-3 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100"
-                                            whileHover={{ scale: 1.1, x: -2 }}
-                                            whileTap={{ scale: 0.9 }}
+                                            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 backdrop-blur-md text-white p-3 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 hover:-translate-x-1"
+                                            style={{
+                                                transform: 'translateY(-50%) translateZ(0)',
+                                                willChange: 'transform, opacity, background-color'
+                                            }}
                                             aria-label="Previous image"
                                         >
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                             </svg>
-                                        </motion.button>
+                                        </button>
                                         
-                                        <motion.button
+                                        <button
                                             onClick={() => setCurrentImageIndex(
                                                 currentImageIndex === heroImages.length - 1 ? 0 : currentImageIndex + 1
                                             )}
-                                            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 backdrop-blur-md text-white p-3 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100"
-                                            whileHover={{ scale: 1.1, x: 2 }}
-                                            whileTap={{ scale: 0.9 }}
+                                            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 backdrop-blur-md text-white p-3 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 hover:translate-x-1"
+                                            style={{
+                                                transform: 'translateY(-50%) translateZ(0)',
+                                                willChange: 'transform, opacity, background-color'
+                                            }}
                                             aria-label="Next image"
                                         >
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                             </svg>
-                                        </motion.button>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
