@@ -15,7 +15,18 @@ export default function Marketplace() {
     const [sortBy, setSortBy] = useState("featured");
 
     useEffect(() => {
-        const staticProducts = [
+        const fetchProducts = async () => {
+            try {
+                // First try to fetch from database
+                const response = await fetch('/api/products');
+                const data = await response.json();
+                
+                if (data.products && data.products.length > 0) {
+                    // Use database products
+                    setProducts(data.products);
+                } else {
+                    // Fallback to static products if no database products
+                    const staticProducts = [
             {
                 id: 1,
                 name: "Traditional Clay Pottery",
@@ -113,8 +124,16 @@ export default function Marketplace() {
                 inStock: false
             }
         ];
-        setProducts(staticProducts);
-        setLoading(false);
+                    setProducts(staticProducts);
+                }
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                setProducts([]);
+            }
+            setLoading(false);
+        };
+        
+        fetchProducts();
     }, []);
 
     const categories = [

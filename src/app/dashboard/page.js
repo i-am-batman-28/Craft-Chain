@@ -15,6 +15,8 @@ export default function Dashboard() {
         price: "",
         category: "",
         imageUrl: "",
+        artisanName: user?.name || "",
+        location: "",
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -54,8 +56,13 @@ export default function Dashboard() {
                     price: "",
                     category: "",
                     imageUrl: "",
+                    artisanName: user?.name || "",
+                    location: "",
                 });
-                alert("Product created successfully!");
+                alert("✅ Product created successfully! It will now appear in the marketplace.");
+                
+                // Optionally refresh the marketplace (this would require state management or page refresh)
+                // window.location.reload(); // Uncomment if you want to refresh the page
             }
         } catch (error) {
             console.error("Error creating product:", error);
@@ -147,6 +154,43 @@ export default function Dashboard() {
                             <option value="jewelry">Jewelry</option>
                             <option value="woodwork">Woodwork</option>
                         </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Artisan Name
+                        </label>
+                        <input
+                            type="text"
+                            value={newProduct.artisanName}
+                            onChange={(e) =>
+                                setNewProduct({
+                                    ...newProduct,
+                                    artisanName: e.target.value,
+                                })
+                            }
+                            className="mt-1 block w-full p-2 border rounded-md"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Location
+                        </label>
+                        <input
+                            type="text"
+                            value={newProduct.location}
+                            onChange={(e) =>
+                                setNewProduct({
+                                    ...newProduct,
+                                    location: e.target.value,
+                                })
+                            }
+                            placeholder="City, State"
+                            className="mt-1 block w-full p-2 border rounded-md"
+                            required
+                        />
                     </div>
 
                     <div>
