@@ -179,16 +179,40 @@ export default function Marketplace() {
         { id: "woodwork", name: "Woodwork", count: products.filter(p => p.category === "woodwork").length }
     ], [products]);
 
-    // Memoize filtered products to avoid recalculating on every render
+    // Memoize filtered and sorted products to avoid recalculating on every render
     const filteredProducts = useMemo(() => {
-        return products.filter(product => {
+        let filtered = products.filter(product => {
             const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                 product.artisanName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                 product.location.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory = category === "all" || product.category === category;
             return matchesSearch && matchesCategory;
         });
-    }, [products, searchTerm, category]);
+
+        // Apply sorting
+        switch (sortBy) {
+            case "price-low-high":
+                filtered = filtered.sort((a, b) => a.price - b.price);
+                break;
+            case "price-high-low":
+                filtered = filtered.sort((a, b) => b.price - a.price);
+                break;
+            case "rating":
+                filtered = filtered.sort((a, b) => b.rating - a.rating);
+                break;
+            case "newest":
+                // For newest, we'll sort by id (higher id = newer) as a fallback
+                // In a real app, you'd sort by createdAt timestamp
+                filtered = filtered.sort((a, b) => (b._id || b.id) - (a._id || a.id));
+                break;
+            case "featured":
+            default:
+                // Keep original order for featured (default)
+                break;
+        }
+
+        return filtered;
+    }, [products, searchTerm, category, sortBy]);
 
     const handlePurchase = (product) => {
         // Use _id for database products, fallback to id for static products
@@ -290,10 +314,10 @@ export default function Marketplace() {
                                 className="px-4 py-2 bg-white border-2 border-neutral-200 rounded-xl focus:border-primary-400 focus:ring-4 focus:ring-primary-100 transition-all duration-200"
                             >
                                 <option value="featured">Featured</option>
-                                <option value="price-low">Price: Low to High</option>
-                                <option value="price-high">Price: High to Low</option>
+                                <option value="price-low-high">Price: Low to High</option>
+                                <option value="price-high-low">Price: High to Low</option>
                                 <option value="rating">Highest Rated</option>
-                                <option value="newest">Newest</option>
+                                <option value="newest"> Newest</option>
                             </select>
                         </div>
                     </motion.div>
